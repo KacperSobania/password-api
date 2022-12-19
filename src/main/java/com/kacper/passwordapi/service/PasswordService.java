@@ -1,6 +1,7 @@
 package com.kacper.passwordapi.service;
 
 import com.kacper.passwordapi.dto.PasswordDto;
+import com.kacper.passwordapi.entity.Password;
 import com.kacper.passwordapi.repository.PasswordRepository;
 import lombok.RequiredArgsConstructor;
 import org.passay.CharacterData;
@@ -9,6 +10,7 @@ import org.passay.EnglishCharacterData;
 import org.passay.PasswordGenerator;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +25,12 @@ public class PasswordService {
         for(int i = 0; i < numberOfPasswords; i++){
             String password = generatePassword(length, specialCharactersPresence, lowerCasePresence, capitalCasePresence);
             String complexity = defineComplexity(length, specialCharactersPresence, lowerCasePresence, capitalCasePresence);
-            passwordDtos.add(new PasswordDto(password, complexity));
+            PasswordDto passwordDto = new PasswordDto(password, complexity);
+            if(passwordRepository.findFirstByPassword(password) != null){
+                passwordDto.setPasswordAlreadyExists(true);
+            }
+            passwordDtos.add(passwordDto);
+            passwordRepository.save(new Password(password, complexity, LocalDateTime.now()));
         }
         return passwordDtos;
     }
@@ -46,7 +53,7 @@ public class PasswordService {
 
                 @Override
                 public String getCharacters() {
-                    return "!@#$%^&*()-_=+[]{}|\\?/<>,.;:'\"`~";
+                    return "!@#$%^&*()-_=+[]{}|?/<>,.;:'`~";
                 }
             }, 1));
         }
