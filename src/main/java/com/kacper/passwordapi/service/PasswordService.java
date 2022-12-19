@@ -1,6 +1,7 @@
 package com.kacper.passwordapi.service;
 
 import com.kacper.passwordapi.dto.PasswordDto;
+import com.kacper.passwordapi.dto.VerifiedPasswordDto;
 import com.kacper.passwordapi.entity.Password;
 import com.kacper.passwordapi.repository.PasswordRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,16 @@ public class PasswordService {
             passwordRepository.save(new Password(password, complexity, LocalDateTime.now()));
         }
         return passwordDtos;
+    }
+
+    public VerifiedPasswordDto verifyPassword(String password){
+        Password passwordFromDatabase = passwordRepository.findFirstByPassword(password);
+        if(passwordFromDatabase != null){
+            return new VerifiedPasswordDto(passwordFromDatabase.getPassword(), passwordFromDatabase.getComplexity(), passwordFromDatabase.getCreated());
+        } else{
+            String complexity = defineComplexity(password.length(), password.matches(".*[!@#$%^&*()-_=+\\[\\]{}|?/<>,.;:'`~].*"), password.matches(".*[a-z].*"), password.matches(".*[A-Z].*"));
+            return new VerifiedPasswordDto(password, complexity, null);
+        }
     }
 
     private String generatePassword(int length, boolean specialCharactersPresence, boolean lowerCasePresence, boolean capitalCasePresence){
