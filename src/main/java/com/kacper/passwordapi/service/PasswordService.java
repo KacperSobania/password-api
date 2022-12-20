@@ -1,9 +1,10 @@
 package com.kacper.passwordapi.service;
 
+import com.kacper.passwordapi.dto.GeneratedPasswordDto;
 import com.kacper.passwordapi.dto.PasswordDto;
-import com.kacper.passwordapi.dto.VerifiedPasswordDto;
 import com.kacper.passwordapi.entity.Password;
 import com.kacper.passwordapi.repository.PasswordRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.passay.CharacterData;
 import org.passay.CharacterRule;
@@ -21,28 +22,42 @@ public class PasswordService {
 
     private final PasswordRepository passwordRepository;
 
-    public List<PasswordDto> createPassword(int length, boolean specialCharactersPresence, boolean lowerCasePresence, boolean capitalCasePresence, int numberOfPasswords){
-        List<PasswordDto> passwordDtos = new ArrayList<>();
+    @Transactional
+    public List<GeneratedPasswordDto> createPassword(int length, boolean specialCharactersPresence, boolean lowerCasePresence, boolean capitalCasePresence, int numberOfPasswords){
+        List<GeneratedPasswordDto> generatedPasswordDtos = new ArrayList<>();
         for(int i = 0; i < numberOfPasswords; i++){
             String password = generatePassword(length, specialCharactersPresence, lowerCasePresence, capitalCasePresence);
             String complexity = defineComplexity(length, specialCharactersPresence, lowerCasePresence, capitalCasePresence);
-            PasswordDto passwordDto = new PasswordDto(password, complexity);
+            GeneratedPasswordDto generatedPasswordDto = new GeneratedPasswordDto(password, complexity);
             if(passwordRepository.findFirstByPassword(password) != null){
-                passwordDto.setPasswordAlreadyExists(true);
+                generatedPasswordDto.setPasswordAlreadyExists(true);
             }
-            passwordDtos.add(passwordDto);
+            generatedPasswordDtos.add(generatedPasswordDto);
             passwordRepository.save(new Password(password, complexity, LocalDateTime.now()));
         }
-        return passwordDtos;
+        return generatedPasswordDtos;
     }
 
-    public VerifiedPasswordDto verifyPassword(String password){
+    public PasswordDto verifyPassword(String password){
         Password passwordFromDatabase = passwordRepository.findFirstByPassword(password);
         if(passwordFromDatabase != null){
-            return new VerifiedPasswordDto(passwordFromDatabase.getPassword(), passwordFromDatabase.getComplexity(), passwordFromDatabase.getCreated());
+            return new PasswordDto(passwordFromDatabase.getPassword(), passwordFromDatabase.getComplexity(), passwordFromDatabase.getCreated());
         } else{
             String complexity = defineComplexity(password.length(), password.matches(".*[!@#$%^&*()-_=+\\[\\]{}|?/<>,.;:'`~].*"), password.matches(".*[a-z].*"), password.matches(".*[A-Z].*"));
-            return new VerifiedPasswordDto(password, complexity, null);
+            return new PasswordDto(password, complexity, null);
+        }
+    }
+
+    @Transactional
+    public PasswordDto removePassword(String password){
+        Password passwordFromDatabase = passwordRepository.findFirstByPassword(password);
+        if(passwordFromDatabase != null){
+            PasswordDto passwordDto = new PasswordDto(passwordFromDatabase.getPassword(), passwordFromDatabase.getComplexity(), null);
+            passwordRepository.deleteByPassword(password);
+            return passwordDto;
+        } else{
+            String complexity = defineComplexity(password.length(), password.matches(".*[!@#$%^&*()-_=+\\[\\]{}|?/<>,.;:'`~].*"), password.matches(".*[a-z].*"), password.matches(".*[A-Z].*"));
+            return new PasswordDto(password, complexity, null);
         }
     }
 
