@@ -43,7 +43,7 @@ public class PasswordService {
         if(passwordFromDatabase != null){
             return new PasswordDto(passwordFromDatabase.getPassword(), passwordFromDatabase.getComplexity(), passwordFromDatabase.getCreated());
         } else{
-            String complexity = defineComplexity(password.length(), password.matches(".*[!@#$%^&*()-_=+\\[\\]{}|?/<>,.;:'`~].*"), password.matches(".*[a-z].*"), password.matches(".*[A-Z].*"));
+            String complexity = defineComplexity(password.length(), password.matches(".*[!@#$%^&*()\\-_=+\\[\\]{}|?/<>,.;:'`~].*"), password.matches(".*[a-z].*"), password.matches(".*[A-Z].*"));
             return new PasswordDto(password, complexity, null);
         }
     }
@@ -56,7 +56,7 @@ public class PasswordService {
             passwordRepository.deleteByPassword(password);
             return passwordDto;
         } else{
-            String complexity = defineComplexity(password.length(), password.matches(".*[!@#$%^&*()-_=+\\[\\]{}|?/<>,.;:'`~].*"), password.matches(".*[a-z].*"), password.matches(".*[A-Z].*"));
+            String complexity = defineComplexity(password.length(), password.matches(".*[!@#$%^&*()\\-_=+\\[\\]{}|?/<>,.;:'`~].*"), password.matches(".*[a-z].*"), password.matches(".*[A-Z].*"));
             return new PasswordDto(password, complexity, null);
         }
     }
