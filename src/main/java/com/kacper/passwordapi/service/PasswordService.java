@@ -27,7 +27,7 @@ public class PasswordService {
         List<GeneratedPasswordDto> generatedPasswordDtos = new ArrayList<>();
         for(int i = 0; i < numberOfPasswords; i++){
             String password = generatePassword(length, specialCharactersPresence, lowerCasePresence, capitalCasePresence);
-            String complexity = defineComplexity(length, specialCharactersPresence, lowerCasePresence, capitalCasePresence);
+            String complexity = definePasswordComplexity(password);
             GeneratedPasswordDto generatedPasswordDto = new GeneratedPasswordDto(password, complexity);
             if(passwordRepository.findFirstByPassword(password) != null){
                 generatedPasswordDto.setPasswordAlreadyExists(true);
@@ -43,7 +43,7 @@ public class PasswordService {
         if(passwordFromDatabase != null){
             return new PasswordDto(passwordFromDatabase.getPassword(), passwordFromDatabase.getComplexity(), passwordFromDatabase.getCreated());
         } else{
-            String complexity = defineComplexity(password.length(), password.matches(".*[!@#$%^&*()\\-_=+\\[\\]{}|?/<>,.;:'`~].*"), password.matches(".*[a-z].*"), password.matches(".*[A-Z].*"));
+            String complexity = definePasswordComplexity(password);
             return new PasswordDto(password, complexity, null);
         }
     }
@@ -56,7 +56,7 @@ public class PasswordService {
             passwordRepository.deleteByPassword(password);
             return passwordDto;
         } else{
-            String complexity = defineComplexity(password.length(), password.matches(".*[!@#$%^&*()\\-_=+\\[\\]{}|?/<>,.;:'`~].*"), password.matches(".*[a-z].*"), password.matches(".*[A-Z].*"));
+            String complexity = definePasswordComplexity(password);
             return new PasswordDto(password, complexity, null);
         }
     }
@@ -88,12 +88,16 @@ public class PasswordService {
         return generator.generatePassword(length, rules);
     }
 
-    private String defineComplexity(int length, boolean specialCharactersPresence, boolean lowerCasePresence, boolean capitalCasePresence) {
-        if (length > 16 && specialCharactersPresence && lowerCasePresence && capitalCasePresence) {
+    private String definePasswordComplexity(String password) {
+        int passwordLength = password.length();
+        boolean specialCharactersPresence = password.matches(".*[!@#$%^&*()\\-_=+\\[\\]{}|?/<>,.;:'`~].*");
+        boolean lowerCasePresence = password.matches(".*[a-z].*");
+        boolean capitalCasePresence = password.matches(".*[A-Z].*");
+        if (passwordLength > 16 && specialCharactersPresence && lowerCasePresence && capitalCasePresence) {
             return "very strong";
-        } else if(length > 8 && specialCharactersPresence && lowerCasePresence && capitalCasePresence) {
+        } else if(passwordLength > 8 && specialCharactersPresence && lowerCasePresence && capitalCasePresence) {
             return "strong";
-        } else if(length > 5 && !specialCharactersPresence){
+        } else if(passwordLength > 5 && !specialCharactersPresence){
             return "medium";
         } else {
             return "weak";
