@@ -26,7 +26,7 @@ class PasswordServiceTest {
     }
 
     @Test
-    void createPasswordThatDoNotExistInDatabase() {
+    void createPasswordThatDoesNotExistInDatabase() {
         when(passwordRepository.findFirstByPassword(any(String.class))).thenReturn(null);
 
         List<GeneratedPasswordDto> generatedPasswordDtos = passwordService.createPassword(7, false, true, true, 3);
@@ -71,7 +71,7 @@ class PasswordServiceTest {
     }
 
     @Test
-    void verifyPasswordThatDoNotExistsInDatabase() {
+    void verifyPasswordThatDoesNotExistsInDatabase() {
         when(passwordRepository.findFirstByPassword("op@x")).thenReturn(null);
 
         PasswordDto passwordDto = passwordService.verifyPassword("op@x");
@@ -94,7 +94,7 @@ class PasswordServiceTest {
     }
 
     @Test
-    void removePasswordThatDoNotExistsInDatabase() {
+    void removePasswordThatDoesNotExistsInDatabase() {
         when(passwordRepository.findFirstByPassword("#%Ou&s*x>/:poZQW^+a")).thenReturn(null);
 
         PasswordDto passwordDto = passwordService.removePassword("#%Ou&s*x>/:poZQW^+a");
