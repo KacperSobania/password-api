@@ -3,6 +3,7 @@ package com.kacper.passwordapi.service;
 import com.kacper.passwordapi.dto.GeneratedPasswordDto;
 import com.kacper.passwordapi.dto.PasswordDto;
 import com.kacper.passwordapi.entity.Password;
+import com.kacper.passwordapi.exception.UnacceptableValuesOfParametersException;
 import com.kacper.passwordapi.repository.PasswordRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,9 @@ public class PasswordService {
 
     @Transactional
     public List<GeneratedPasswordDto> createPassword(int length, boolean specialCharactersPresence, boolean lowerCasePresence, boolean capitalCasePresence, int numberOfPasswords){
+        if(!specialCharactersPresence && !lowerCasePresence && !capitalCasePresence){
+            throw new UnacceptableValuesOfParametersException();
+        }
         List<GeneratedPasswordDto> generatedPasswordDtos = new ArrayList<>();
         for(int i = 0; i < numberOfPasswords; i++){
             String password = generatePassword(length, specialCharactersPresence, lowerCasePresence, capitalCasePresence);
