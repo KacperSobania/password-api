@@ -3,6 +3,8 @@ package com.kacper.passwordapi.service;
 import com.kacper.passwordapi.dto.GeneratedPasswordDto;
 import com.kacper.passwordapi.dto.PasswordDto;
 import com.kacper.passwordapi.entity.Password;
+import com.kacper.passwordapi.enums.PasswordComplexity;
+import com.kacper.passwordapi.exception.NotFoundException;
 import com.kacper.passwordapi.exception.UnacceptableValuesOfParametersException;
 import com.kacper.passwordapi.repository.PasswordRepository;
 import jakarta.transaction.Transactional;
@@ -31,13 +33,13 @@ public class PasswordService {
         List<GeneratedPasswordDto> generatedPasswordDtos = new ArrayList<>();
         for(int i = 0; i < numberOfPasswords; i++){
             String password = generatePassword(length, specialCharactersPresence, lowerCasePresence, capitalCasePresence);
-            String complexity = definePasswordComplexity(password);
-            GeneratedPasswordDto generatedPasswordDto = new GeneratedPasswordDto(password, complexity);
+            PasswordComplexity complexity = definePasswordComplexity(password);
+            GeneratedPasswordDto generatedPasswordDto = new GeneratedPasswordDto(password, complexity.toString());
             if(passwordRepository.findFirstByPassword(password) != null){
                 generatedPasswordDto.setPasswordAlreadyExists(true);
             }
             generatedPasswordDtos.add(generatedPasswordDto);
-            passwordRepository.save(new Password(password, complexity, LocalDateTime.now()));
+            passwordRepository.save(new Password(password, complexity.toString(), LocalDateTime.now()));
         }
         return generatedPasswordDtos;
     }
@@ -46,9 +48,9 @@ public class PasswordService {
         Password passwordFromDatabase = passwordRepository.findFirstByPassword(password);
         if(passwordFromDatabase != null){
             return new PasswordDto(passwordFromDatabase.getPassword(), passwordFromDatabase.getComplexity(), passwordFromDatabase.getCreated());
-        } else{
-            String complexity = definePasswordComplexity(password);
-            return new PasswordDto(password, complexity, null);
+        } else {
+            PasswordComplexity complexity = definePasswordComplexity(password);
+            return new PasswordDto(password, complexity.toString(), null);
         }
     }
 
@@ -59,9 +61,8 @@ public class PasswordService {
             PasswordDto passwordDto = new PasswordDto(passwordFromDatabase.getPassword(), passwordFromDatabase.getComplexity(), null);
             passwordRepository.deleteByPassword(password);
             return passwordDto;
-        } else{
-            String complexity = definePasswordComplexity(password);
-            return new PasswordDto(password, complexity, null);
+        } else {
+            throw new NotFoundException();
         }
     }
 
@@ -92,19 +93,19 @@ public class PasswordService {
         return generator.generatePassword(length, rules);
     }
 
-    private String definePasswordComplexity(String password) {
+    private PasswordComplexity definePasswordComplexity(String password) {
         int passwordLength = password.length();
         boolean specialCharactersPresence = password.matches(".*[!@#$%^&*()\\-_=+\\[\\]{}|?/<>,.;:'`~].*");
         boolean lowerCasePresence = password.matches(".*[a-z].*");
         boolean capitalCasePresence = password.matches(".*[A-Z].*");
         if (passwordLength > 16 && specialCharactersPresence && lowerCasePresence && capitalCasePresence) {
-            return "very strong";
+            return PasswordComplexity.VERY_STRONG;
         } else if(passwordLength > 8 && specialCharactersPresence && lowerCasePresence && capitalCasePresence) {
-            return "strong";
+            return PasswordComplexity.STRONG;
         } else if(passwordLength > 5 && !specialCharactersPresence){
-            return "medium";
+            return PasswordComplexity.MEDIUM;
         } else {
-            return "weak";
+            return PasswordComplexity.WEAK;
         }
     }
 

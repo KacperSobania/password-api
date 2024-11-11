@@ -1,5 +1,6 @@
 package com.kacper.passwordapi.exceptionhandler;
 
+import com.kacper.passwordapi.exception.NotFoundException;
 import com.kacper.passwordapi.exception.UnacceptableValuesOfParametersException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,12 @@ public class ExceptionHandler {
     @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
     public ResponseEntity<ErrorResponse> unacceptableValuesOfParametersExceptionHandler(UnacceptableValuesOfParametersException exception){
         return new ResponseEntity<>(new ErrorResponse(HttpStatus.PRECONDITION_FAILED, exception.getMessage()), HttpStatus.PRECONDITION_FAILED);
+    }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
+    public ResponseEntity<ErrorResponse> notFoundExceptionHandler(NotFoundException exception){
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.NOT_FOUND, exception.getMessage()), HttpStatus.NOT_FOUND);
     }
 
 }

@@ -1,6 +1,5 @@
 package com.kacper.passwordapi.exceptionhandler;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,7 +17,7 @@ public class ErrorResponse {
     private String message;
 
     public ErrorResponse(HttpStatus httpStatus, String message){
-        timestamp = LocalDateTime.now();
+        this.timestamp = LocalDateTime.now();
         this.status = httpStatus.value();
         this.error = httpStatus.name();
         this.message = message;

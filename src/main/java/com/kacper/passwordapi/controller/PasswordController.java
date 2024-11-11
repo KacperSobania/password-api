@@ -21,7 +21,12 @@ public class PasswordController {
     private final PasswordService passwordService;
 
     @GetMapping("/passwords")
-    public List<GeneratedPasswordDto> createPassword(@RequestParam(name = "lgth") @Min(value = 3, message = "Password must be at least {value} characters long") @Max(value = 32, message = "Password can not be longer than {value} characters") int length, @RequestParam(defaultValue = "false", name = "spclCh") boolean specialCharactersPresence, @RequestParam(defaultValue = "true", name = "lwrCsLet") boolean lowerCaseLetterPresence, @RequestParam(defaultValue = "false", name = "cptCsLet") boolean capitalCaseLetter, @RequestParam(name = "passwords") @Min(value = 1, message = "Number of generated passwords must be at least {value}") @Max(value = 1000, message = "Number of generated passwords can not be higher than {value}") int numberOfPasswords){
+    public List<GeneratedPasswordDto> createPassword(
+            @RequestParam(name = "lgth") @Min(value = 3, message = "Password must be at least {value} characters long") @Max(value = 32, message = "Password can not be longer than {value} characters") int length,
+            @RequestParam(defaultValue = "false", name = "spclCh") boolean specialCharactersPresence,
+            @RequestParam(defaultValue = "true", name = "lwrCsLet") boolean lowerCaseLetterPresence,
+            @RequestParam(defaultValue = "false", name = "cptCsLet") boolean capitalCaseLetter,
+            @RequestParam(name = "passwords") @Min(value = 1, message = "Number of generated passwords must be at least {value}") @Max(value = 1000, message = "Number of generated passwords can not be higher than {value}") int numberOfPasswords){
         return passwordService.createPassword(length, specialCharactersPresence, lowerCaseLetterPresence, capitalCaseLetter, numberOfPasswords);
     }
 
